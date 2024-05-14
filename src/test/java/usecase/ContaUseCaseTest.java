@@ -51,6 +51,28 @@ public class ContaUseCaseTest {
     }
 
     @Test
+    public void deveCriarContaCorretamente(){
+        //Given
+        Cliente cliente1 = new Cliente("Jorge", "086.235.090-22");
+        Conta conta3 = new Conta("3", cliente1);
+        //When
+        contaUseCase.criarConta(conta3);
+        //Then
+        Assert.assertEquals(conta3, contaGateway.findById("3"));
+    }
+    @Test
+    public void deveBuscarContaCorretamente(){
+        //Given
+        Cliente cliente1 = new Cliente("Jorge", "086.235.090-22");
+        Conta contaCriada = new Conta("3", cliente1);
+        contaGateway.save(contaCriada);
+        //When
+        Conta contaBuscada = contaUseCase.buscarConta("3");
+        //Then
+        Assert.assertEquals(contaCriada, contaGateway.findById("3"));
+    }
+
+    @Test
     public void deveTransferirCorretamenteEntreDuasContas() throws Exception {
         // Mocks
 
@@ -84,6 +106,37 @@ public class ContaUseCaseTest {
         // Then
         Double valorEsperado = 10.0;
         Assert.assertEquals(valorEsperado, conta1.getSaldo());
+    }
+
+    @Test
+    public void validaMensagemDeErroContaNula(){
+        //Given
+        // id inexistente
+        String id = "5";
+        //When
+        try{
+           contaUseCase.emprestimo(id,100.0);
+           Assert.fail("Exception não levantada");
+        //Then
+        } catch (Exception e){
+            Assert.assertEquals("Conta invalida - [id: " + id + "]", e.getMessage());
+        }
+
+    }
+    @Test
+    public void deveRealizarEmprestimoCorretamente() throws Exception{
+        //Given
+        Double saldoEmprestimo = 1000.0;
+        Conta conta = contaGateway.findById("1");
+        conta.adicionarSaldoParaEmprestimo(saldoEmprestimo);
+        //When
+        //Testando igual
+        contaUseCase.emprestimo("1", 1000.0);
+        //Then
+        Double valorEsperadoSaldoEmprestimo = 0.0;
+        Double valorEsperadoSaldoConta = 1000.0;
+        Assert.assertEquals(valorEsperadoSaldoEmprestimo,conta.getSaldoDisponivelParaEmprestimo());
+        Assert.assertEquals(valorEsperadoSaldoConta, conta.getSaldo());
     }
 
     @Test
